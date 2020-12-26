@@ -1,0 +1,65 @@
+{
+  "name": "@littleware/little-devtools",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "description": "",
+  "main": "",
+  "files": [
+    "README.md",
+    "web/*",
+    "commonjs/*",
+    "site/*",
+    "tslint.json"
+  ],
+  "dependencies": {
+    "@types/bunyan": "latest",
+    "@types/express": "latest",
+    "@types/jasmine": "latest",
+    "@types/node": "latest",
+    "@webcomponents/webcomponentsjs": "latest",
+    "aws-sdk": "latest",
+    "express": "latest",
+    "gulp": "latest",
+    "gulp-debug": "latest",
+    "gulp-nunjucks-render": "latest",
+    "gulp-rename": "latest",
+    "gulp-rev": "latest",
+    "gulp-rev-replace": "latest",
+    "gulp-rimraf": "latest",
+    "gulp-sequence": "latest",
+    "gulp-sourcemaps": "latest",
+    "gulp-typescript": "latest",
+    "gulp-watch": "latest",
+    "jasmine": "latest",
+    "jasmine-core": "latest",
+    "karma": "latest",
+    "karma-chrome-launcher": "latest",
+    "karma-jasmine": "latest",
+    "marked": "latest",
+    "merge2": "latest",
+    "mkdirp": "latest",
+    "nunjucks": "latest",
+    "nunjucks-markdown": "latest",
+    "ts-custom-elements": "latest",
+    "tslint": "latest",
+    "typescript": "latest",
+  },
+  "devDependencies": {
+  },
+  "bin": {
+    "little-server": "./commonjs/bin/little-server.js"
+  },
+  "scripts": {
+    "build": "gulp",
+    "start": "node commonjs/bin/little-server.js /modules/@littleware/little-elements/web/ ./web/ /admin module:./commonjs/bin/helloHandler.js",
+    "watch": "gulp little-watch",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frickjack/little-elements.git"
+  },
+  "author": "",
+  "homepage": "https://github.com/frickjack/little-elements",
+  "license": "ISC"
+}

@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        //noImplicitAny: true,
+        "target": "commonjs",
+        "sourceMap": true,
+        "declaration": true,
+        "sourceRoot": "src",
+        "rootDirs": [
+            ".",
+            "node_modules"
+        ],
+        "traceResolution": true
+    }
+    // declaration: true
+}

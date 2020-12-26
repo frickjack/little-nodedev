@@ -1,0 +1,11 @@
+{
+  "spec_dir": "commonjs",
+  "spec_files": [
+    "**/*[sS]pec.js"
+  ],
+  "helpers": [
+    "bin/testMain.js"
+  ],
+  "stopSpecOnExpectationFailure": true,
+  "random": true
+}
