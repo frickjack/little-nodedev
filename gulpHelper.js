@@ -1,20 +1,72 @@
 //const gulp = require('gulp');
-const gulpSequence = require('gulp-sequence');
-const debug = require('gulp-debug');
 const clean = require('gulp-rimraf');
+const fs = require('fs');
 const ts = require('gulp-typescript');
 const markdown = require('nunjucks-markdown');
 const marked = require('marked');
 const nunjucksRender = require('gulp-nunjucks-render');
 const sourcemaps = require('gulp-sourcemaps');
-const exec = require('child_process').exec;
 const mkdirp = require('mkdirp');
 const merge = require('merge2');
-const rename = require('gulp-rename');
 
-const defaultData = {
-    jsroot: '/modules'
+
+function loadJsonFromFileSync(fileName) {
+    const data = fs.readFileSync(fileName, "utf8");
+    const config = JSON.parse(data);
+    return config;
+}
+
+module.exports.loadJsonFromFileSync = loadJsonFromFileSync;
+
+const package = loadJsonFromFileSync("package.json");
+module.exports.package = package;
+
+const defaultConfig = {
+    basePath: `src/${package.name}`,
+    nunjucks: {
+        data: {
+            jsroot: "/modules",
+        },
+    },
+    staging: {
+        jsroot: `/modules/${package.version}`,
+        modules: [
+            '@littleware/little-elements/web',
+            'font-awesome',
+            'i18next',
+            'jasmine-core/lib/jasmine-core',
+            'lit-html',
+            'purecss',
+            '@webcomponents/webcomponentsjs',
+        ]
+    }
 };
+
+defaultConfig.staging.modules = defaultConfig.staging.modules.filter(
+    (it) => fs.existsSync(`node_modules/${it}/`)
+);
+
+module.exports.defaultConfig = defaultConfig;
+
+/**
+ * makeFolder mkdirp adapter to Promise
+ * 
+ * @param {string} path 
+ */
+function makeFolder(path) {
+    return new Promise( function(resolve, reject) {
+            mkdirp( path, function(err) {
+                    if (err) {
+                        console.log( err );
+                        reject( err );
+                    } else {
+                        resolve( path );
+                    }
+            });
+        });
+};
+
+module.exports.makeFolder = makeFolder;
 
 /**
  * Define gulp tasks for building the
@@ -22,18 +74,16 @@ const defaultData = {
  * config.basePath 
  *     (ex: { basePath: src/@littleware/little-elements, jsroot: /modules })
  * 
- * @param {basePath, data} config where basePath is the gulp.src basePath, 
- *       and data object holds variables passed to nunjucks templates 
+ * @param {basePath, staging} config where basePath is the gulp.src basePath, 
+ *       and staging object holds config for the little-stage task 
  */
-module.exports.defineTasks = function(gulp, config) {
-    config = config || {};
-    config.data = config.data || {};
-    let { basePath, data } = config;
+function defineTasks(gulp, config) {
+    config = { ...defaultConfig, ...(config || {}) };
+    let basePath = config.basePath;
     if ( ! basePath ) {
         console.log( "ERROR: basePath must be configured" );
         return;
     }
-    data = { ...defaultData, ...data };
 
     // register markdown support with nunjucks
     const nunjucksManageEnv = function(env) {
@@ -68,8 +118,8 @@ module.exports.defineTasks = function(gulp, config) {
         .pipe( 
             nunjucksRender(
                 {
-                    data,
-                    envOptions:{ autoescape: false }, 
+                    data: config.nunjucks.data,
+                    envOptions: { autoescape: false }, 
                     manageEnv:nunjucksManageEnv, 
                     path: [ basePath, "node_modules/@littleware" ]
                 }
@@ -145,8 +195,6 @@ module.exports.defineTasks = function(gulp, config) {
         return gulp.src( basePath + '/lib/**/*.njk' ).pipe( gulp.dest( "web/lib/" ) );
     });
 
-    gulp.task
-
     gulp.task('little-compile', gulp.series('little-compilehtml', 'little-compilets-web', 'little-compilets-commonjs', 'little-compileimg', 'little-copynjk', 'little-json', (done) => {
         return done();
     }));
@@ -160,10 +208,36 @@ module.exports.defineTasks = function(gulp, config) {
         return gulp.watch( ['src/**/*.html', 'src/**/*.css', 'src/**/*.njk'], gulp.series('little-compilehtml') ); 
     });
 
-
     gulp.task('little-watch', gulp.parallel('little-watchts', 'little-watchhtml', (done) => {
         return done();
     }));
 
-    gulp.task( 'little-compileclean', gulp.series('little-clean', 'little-compile'));
+    gulp.task('little-compileclean', gulp.series('little-clean', 'little-compile'));
+
+    /**
+     * Prepare /dist folder for deployment
+     */
+    gulp.task('little-stage', gulp.series('little-clean', 'little-compile', function() {
+        return merge.apply(
+            this,
+            [
+                gulp.src('web/site/**/*.*'
+                    ).pipe(gulp.dest('dist/')),
+                gulp.src('web/**/*.*').pipe(gulp.dest(`dist${config.staging.jsroot}/${package.name}/web/`)),
+                ...
+                config.staging.modules.map(
+                    (it) => {
+                        let pipeline = gulp.src(`node_modules/${it}/**/*.*`);
+                        if (it.match(/@littleware\//)) {
+                            // hack - replace /modules/ path in styleHelper and basicShell
+                            pipeline = pipeline.pipe(replace('"/modules/', `"${config.staging.jsroot}/`));
+                        }
+                        return pipeline.pipe(gulp.dest(`dist${config.staging.jsroot}/${it}/`));
+                    }
+                )
+            ]
+        );
+    }));
 }
+
+module.exports.defineTasks = defineTasks;

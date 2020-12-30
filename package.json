@@ -2,7 +2,7 @@
   "name": "@littleware/little-devtools",
   "version": "1.0.0",
   "type": "commonjs",
-  "description": "",
+  "description": "build and deployment tools for @littlewaer/ projects",
   "main": "",
   "files": [
     "README.md",
@@ -17,16 +17,10 @@
     "@types/jasmine": "latest",
     "@types/node": "latest",
     "@webcomponents/webcomponentsjs": "latest",
-    "aws-sdk": "latest",
-    "express": "latest",
     "gulp": "latest",
-    "gulp-debug": "latest",
     "gulp-nunjucks-render": "latest",
-    "gulp-rename": "latest",
-    "gulp-rev": "latest",
     "gulp-rev-replace": "latest",
     "gulp-rimraf": "latest",
-    "gulp-sequence": "latest",
     "gulp-sourcemaps": "latest",
     "gulp-typescript": "latest",
     "gulp-watch": "latest",
@@ -42,24 +36,21 @@
     "nunjucks-markdown": "latest",
     "ts-custom-elements": "latest",
     "tslint": "latest",
-    "typescript": "latest",
+    "typescript": "latest"
   },
-  "devDependencies": {
-  },
-  "bin": {
-    "little-server": "./commonjs/bin/little-server.js"
-  },
+  "devDependencies": {},
   "scripts": {
     "build": "gulp",
-    "start": "node commonjs/bin/little-server.js /modules/@littleware/little-elements/web/ ./web/ /admin module:./commonjs/bin/helloHandler.js",
+    "start": "little-server /modules/@littleware/little-elements/web/ ./web/ /admin module:./commonjs/bin/helloHandler.js",
     "watch": "gulp little-watch",
-    "lint": "tslint -c tslint.json 'src/**/*.ts'"
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "test": "jasmine"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/frickjack/little-elements.git"
+    "url": "git+https://github.com/frickjack/little-devtools.git"
   },
   "author": "",
-  "homepage": "https://github.com/frickjack/little-elements",
+  "homepage": "https://github.com/frickjack/little-devtools",
   "license": "ISC"
 }
