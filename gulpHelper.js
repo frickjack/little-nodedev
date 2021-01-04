@@ -8,6 +8,7 @@ const nunjucksRender = require('gulp-nunjucks-render');
 const sourcemaps = require('gulp-sourcemaps');
 const mkdirp = require('mkdirp');
 const merge = require('merge2');
+const replace = require('gulp-replace');
 
 
 function loadJsonFromFileSync(fileName) {
