@@ -57,7 +57,7 @@ branching strategy.
 (
   version="$(jq -r .version < package.json)"
   git tag -a "$version" -m "release details in Notes/reference/releaseNotes.md#$version"
-  git push --follow-tags
+  git push origin $version
 )
 ```
 
@@ -65,6 +65,7 @@ After a module version has been published with the `cicd` tag, we must manually 
 ```
 (
   version="$(jq -r .version < package.json)"
-  npm dist-tag add @littleware/little-nodedev@$version latest
+  packname="$(jq -r .name < package.json)"
+  npm dist-tag add "${packname}@$version" latest
 )
 ```
