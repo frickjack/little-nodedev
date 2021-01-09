@@ -56,9 +56,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/frickjack/little-devtools.git"
+    "url": "git+https://github.com/frickjack/little-nodedev.git"
   },
   "author": "",
-  "homepage": "https://github.com/frickjack/little-devtools",
+  "homepage": "https://github.com/frickjack/little-nodedev",
   "license": "ISC"
 }

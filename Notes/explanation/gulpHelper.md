@@ -10,15 +10,18 @@ The gulp build system consumes typescript and web assets from `src/module/name`,
 commonjs
 ├── bin
 │   ├── spec
-└── common
-    └── spec
+├── common
+│   └── spec
+└── maps
 ```
+
 ```
 web
 ├── common
 ├── lib
 └── maps
 ```
+
 ```
 src/@littleware/little-elements
 ├── bin
@@ -29,7 +32,7 @@ src/@littleware/little-elements
 
 ## Use
 
-Import the `gulpHelper` module into your [gulpfile](../gulpfile.js), and call `gulpHelper.defineTasks(gulp, { basePath })` to generate the rules where `basePath` points to the source folder (ex: `src/@littleware/little-elements`).
+Import the `gulpHelper` module into your [gulpfile](../gulpfile.js), and call `gulpHelper.defineTasks(gulp, { basePath })` to generate the rules.
 
 ```
 const gulp = require('gulp');
@@ -38,12 +41,10 @@ const gulpHelper = require('./gulpHelper');
 
 gulpHelper.defineTasks(gulp);
 
-gulp.task('default', gulp.series('little-compile', (done) => {
-    // place code for your default task here
-    //console.log( "Hello, World!" );
-    //gulp.src( "src/**/*" ).pipe( gulp.dest( "lib/" ) );
-    done();
-    }));
+gulp.task('default', gulp.series('little-compile', 
+    (done) => { done(); }
+);
+
 ```
 
 ## Configuration
@@ -78,65 +79,82 @@ const defaultConfig = {
 
 ```
 $ npx gulp --tasks
-[06:52:43] Tasks for ~/Code/little-elements/gulpfile.js
-[06:52:43] ├── little-clean
-[06:52:43] ├── little-compilenunjucks
-[06:52:43] ├─┬ little-compilehtml
-[06:52:43] │ └─┬ <series>
-[06:52:43] │   ├── little-compilenunjucks
-[06:52:43] │   └── <anonymous>
-[06:52:43] ├── little-compilets-commonjs
-[06:52:43] ├── little-compilets-web
-[06:52:43] ├── little-compileimg
-[06:52:43] ├── little-json
-[06:52:43] ├── little-copynjk
-[06:52:43] ├─┬ little-compile
-[06:52:43] │ └─┬ <series>
-[06:52:43] │   ├─┬ little-compilehtml
-[06:52:43] │   │ └─┬ <series>
-[06:52:43] │   │   ├── little-compilenunjucks
-[06:52:43] │   │   └── <anonymous>
-[06:52:43] │   ├── little-compilets-web
-[06:52:43] │   ├── little-compilets-commonjs
-[06:52:43] │   ├── little-compileimg
-[06:52:43] │   ├── little-copynjk
-[06:52:43] │   ├── little-json
-[06:52:43] │   └── <anonymous>
-[06:52:43] ├── little-watchts
-[06:52:43] ├── little-watchhtml
-[06:52:43] ├─┬ little-watch
-[06:52:43] │ └─┬ <parallel>
-[06:52:43] │   ├── little-watchts
-[06:52:43] │   ├── little-watchhtml
-[06:52:43] │   └── <anonymous>
-[06:52:43] ├─┬ little-compileclean
-[06:52:43] │ └─┬ <series>
-[06:52:43] │   ├── little-clean
-[06:52:43] │   └─┬ little-compile
-[06:52:43] │     └─┬ <series>
-[06:52:43] │       ├─┬ little-compilehtml
-[06:52:43] │       │ └─┬ <series>
-[06:52:43] │       │   ├── little-compilenunjucks
-[06:52:43] │       │   └── <anonymous>
-[06:52:43] │       ├── little-compilets-web
-[06:52:43] │       ├── little-compilets-commonjs
-[06:52:43] │       ├── little-compileimg
-[06:52:43] │       ├── little-copynjk
-[06:52:43] │       ├── little-json
-[06:52:43] │       └── <anonymous>
-[06:52:43] └─┬ default
-[06:52:43]   └─┬ <series>
-[06:52:43]     ├─┬ little-compile
-[06:52:43]     │ └─┬ <series>
-[06:52:43]     │   ├─┬ little-compilehtml
-[06:52:43]     │   │ └─┬ <series>
-[06:52:43]     │   │   ├── little-compilenunjucks
-[06:52:43]     │   │   └── <anonymous>
-[06:52:43]     │   ├── little-compilets-web
-[06:52:43]     │   ├── little-compilets-commonjs
-[06:52:43]     │   ├── little-compileimg
-[06:52:43]     │   ├── little-copynjk
-[06:52:43]     │   ├── little-json
-[06:52:43]     │   └── <anonymous>
-[06:52:43]     └── <anonymous>
+[06:33:05] Tasks for ~/Code/little-nodedev/gulpfile.js
+[06:33:05] ├── little-clean
+[06:33:05] ├── little-compilenunjucks
+[06:33:05] ├─┬ little-compilehtml
+[06:33:05] │ └─┬ <series>
+[06:33:05] │   ├── little-compilenunjucks
+[06:33:05] │   └── <anonymous>
+[06:33:05] ├── little-compilets-commonjs
+[06:33:05] ├── little-compilets-web
+[06:33:05] ├── little-compileimg
+[06:33:05] ├── little-json
+[06:33:05] ├── little-copynjk
+[06:33:05] ├─┬ little-compile
+[06:33:05] │ └─┬ <series>
+[06:33:05] │   ├─┬ little-compilehtml
+[06:33:05] │   │ └─┬ <series>
+[06:33:05] │   │   ├── little-compilenunjucks
+[06:33:05] │   │   └── <anonymous>
+[06:33:05] │   ├── little-compilets-web
+[06:33:05] │   ├── little-compilets-commonjs
+[06:33:05] │   ├── little-compileimg
+[06:33:05] │   ├── little-copynjk
+[06:33:05] │   ├── little-json
+[06:33:05] │   └── <anonymous>
+[06:33:05] ├── little-watchts
+[06:33:05] ├── little-watchhtml
+[06:33:05] ├─┬ little-watch
+[06:33:05] │ └─┬ <parallel>
+[06:33:05] │   ├── little-watchts
+[06:33:05] │   ├── little-watchhtml
+[06:33:05] │   └── <anonymous>
+[06:33:05] ├─┬ little-compileclean
+[06:33:05] │ └─┬ <series>
+[06:33:05] │   ├── little-clean
+[06:33:05] │   └─┬ little-compile
+[06:33:05] │     └─┬ <series>
+[06:33:05] │       ├─┬ little-compilehtml
+[06:33:05] │       │ └─┬ <series>
+[06:33:05] │       │   ├── little-compilenunjucks
+[06:33:05] │       │   └── <anonymous>
+[06:33:05] │       ├── little-compilets-web
+[06:33:05] │       ├── little-compilets-commonjs
+[06:33:05] │       ├── little-compileimg
+[06:33:05] │       ├── little-copynjk
+[06:33:05] │       ├── little-json
+[06:33:05] │       └── <anonymous>
+[06:33:05] ├─┬ little-stage
+[06:33:05] │ └─┬ <series>
+[06:33:05] │   ├── little-clean
+[06:33:05] │   ├─┬ little-compile
+[06:33:05] │   │ └─┬ <series>
+[06:33:05] │   │   ├─┬ little-compilehtml
+[06:33:05] │   │   │ └─┬ <series>
+[06:33:05] │   │   │   ├── little-compilenunjucks
+[06:33:05] │   │   │   └── <anonymous>
+[06:33:05] │   │   ├── little-compilets-web
+[06:33:05] │   │   ├── little-compilets-commonjs
+[06:33:05] │   │   ├── little-compileimg
+[06:33:05] │   │   ├── little-copynjk
+[06:33:05] │   │   ├── little-json
+[06:33:05] │   │   └── <anonymous>
+[06:33:05] │   └── <anonymous>
+[06:33:05] └─┬ default
+[06:33:05]   └─┬ <series>
+[06:33:05]     ├─┬ little-compile
+[06:33:05]     │ └─┬ <series>
+[06:33:05]     │   ├─┬ little-compilehtml
+[06:33:05]     │   │ └─┬ <series>
+[06:33:05]     │   │   ├── little-compilenunjucks
+[06:33:05]     │   │   └── <anonymous>
+[06:33:05]     │   ├── little-compilets-web
+[06:33:05]     │   ├── little-compilets-commonjs
+[06:33:05]     │   ├── little-compileimg
+[06:33:05]     │   ├── little-copynjk
+[06:33:05]     │   ├── little-json
+[06:33:05]     │   └── <anonymous>
+[06:33:05]     └── <anonymous>
+
 ```
