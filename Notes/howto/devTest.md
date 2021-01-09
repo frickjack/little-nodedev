@@ -56,7 +56,7 @@ branching strategy.
 ```
 (
   version="$(jq -r .version < package.json)"
-  git tag -a "$version" -m "release details in Notes/references/releaseNotes.md#$version"
+  git tag -a "$version" -m "release details in Notes/reference/releaseNotes.md#$version"
   git push --follow-tags
 )
 ```

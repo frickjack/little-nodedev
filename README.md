@@ -12,6 +12,10 @@ See [this bLog](https://www.divio.com/blog/documentation/) for an introduction t
 
 ### How-to
 
+* [dev-test](./Notes/howto/devTest.md)
+
 ### Tutorials
 
 ### Reference
+
+* [release notes](./Notes/reference/releaseNotes.md)
