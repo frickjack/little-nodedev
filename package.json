@@ -1,15 +1,9 @@
 {
   "name": "@littleware/little-nodedev",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "commonjs",
   "description": "build and deployment tools for @littlewaer/ projects",
   "main": "",
-  "bin": {
-    "gulp": "node_modules/gulp/bin/gulp.js",
-    "jasmine": "node_modules/jasmine/bin/jasmine.js",
-    "tsc": "node_modules/typescript/bin/tsc",
-    "tslint": "node_modules/tslint/bin/tslint"
-  },
   "files": [
     "README.md",
     "web/*",
