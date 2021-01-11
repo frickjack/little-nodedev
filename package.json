@@ -1,6 +1,6 @@
 {
   "name": "@littleware/little-nodedev",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "commonjs",
   "description": "build and deployment tools for @littlewaer/ projects",
   "main": "",
@@ -9,7 +9,10 @@
     "web/*",
     "commonjs/*",
     "site/*",
-    "tslint.json"
+    "spec/*",
+    "tslint.json",
+    "gulpfile.js",
+    "gulpHelper.js"
   ],
   "dependencies": {
     "gulp-nunjucks-render": "latest",
