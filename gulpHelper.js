@@ -191,12 +191,23 @@ function defineTasks(gulp, config) {
         );
     });
 
+    /** Copy markdown files over over */
+    gulp.task('little-markdown', () => {
+        return merge(
+            gulp.src(basePath + '/bin/**/*.md').pipe(gulp.dest('commonjs/bin')),
+            gulp.src(basePath + '/common/**/*.md').pipe(gulp.dest('commonjs/common')),
+            gulp.src(basePath + '/lib/**/*.md').pipe(gulp.dest('web/lib')),
+            gulp.src(basePath + '/common/**/*.md').pipe(gulp.dest('web/common')),
+            gulp.src(basePath + '/site/**/*.md').pipe(gulp.dest('web/site')),
+        );
+    });
+    
     /** Copy nunjucks templates over */
     gulp.task('little-copynjk', () => {
         return gulp.src( basePath + '/lib/**/*.njk' ).pipe( gulp.dest( "web/lib/" ) );
     });
 
-    gulp.task('little-compile', gulp.series('little-compilehtml', 'little-compilets-web', 'little-compilets-commonjs', 'little-compileimg', 'little-copynjk', 'little-json', (done) => {
+    gulp.task('little-compile', gulp.series('little-compilehtml', 'little-compilets-web', 'little-compilets-commonjs', 'little-compileimg', 'little-copynjk', 'little-json', 'little-markdown', (done) => {
         return done();
     }));
 
