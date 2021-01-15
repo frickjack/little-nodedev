@@ -25,7 +25,7 @@ The build process is setup so that commonjs and web modules are layed out for ea
 
 ## Dev-test
 
-See the `./buildspec.yml` [codebuild](https://aws.amazon.com/codebuild/) configuration.
+See the [buildspec.yml](../../buildspec.yml) [codebuild](https://aws.amazon.com/codebuild/) configuration.
 
 ```
 npm run build
@@ -45,7 +45,7 @@ The `lint` script integrates with `tslint`.  There is active development under w
 
 ## CICD
 
-The `buildspec.yml` file defines a [codebuild](https://aws.amazon.com/codebuild/) pipeline that builds and tests code committed to the github repository.
+The [buildspec.yml](../../buildspec.yml) file defines a [codebuild](https://aws.amazon.com/codebuild/) pipeline that builds and tests code committed to the github repository.
 
 ## npm publish
 
