@@ -1,6 +1,6 @@
 {
   "name": "@littleware/little-nodedev",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "commonjs",
   "description": "build and deployment tools for @littlewaer/ projects",
   "main": "",
