@@ -188,6 +188,7 @@ function defineTasks(gulp, config) {
             gulp.src(basePath + '/common/**/*.json').pipe(gulp.dest('commonjs/common')),
             gulp.src(basePath + '/lib/**/*.json').pipe(gulp.dest('web/lib')),
             gulp.src(basePath + '/common/**/*.json').pipe(gulp.dest('web/common')),
+            gulp.src(basePath + '/site/**/*.json').pipe(gulp.dest('web/site')),
         );
     });
 
