@@ -18,6 +18,12 @@ src/@module-group/module/
 * `lib` - compiled into `./web/lib/`
 * `site` - html, nunjucks templates, and other web content compiled into `./site`
 
+## Repository Management
+
+[Angular style](https://medium.com/@menuka/writing-meaningful-git-commit-messages-a62756b65c81) commit messages.
+
+[Gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) branch management.  A short-lived branches should rebase (rather than merge) to sync up with the long-lived parent it branches off of.
+
 ## Deployment
 
 The build process is setup so that commonjs and web modules are layed out for easy import into other npm packages.  The web content is setup to load code via relative paths when possible, but otherwise assumes javascript modules are deployed under a `/modules/` root.
