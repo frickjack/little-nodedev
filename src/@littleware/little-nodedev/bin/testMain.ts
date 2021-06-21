@@ -1,1 +1,1 @@
-import "./spec/devtoolsSpec.js";
+import './spec/devtoolsSpec.js';

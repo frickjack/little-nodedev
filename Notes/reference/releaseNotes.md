@@ -3,6 +3,11 @@
 Some basic information on our tagged releases.
 Note - `git log tag1...tag2` shows the commit log between versions.
 
+## Version 1.1.0
+
+* transition to `@fortawesome/fontawesome-free` npm package for icons
+* transition to [eslint](https://eslint.org/) and [typescript-eslint](https://github.com/typescript-eslint/typescript-eslint)
+
 ## Version 1.0.6
 
 * gulpHelper handling of json files under site/

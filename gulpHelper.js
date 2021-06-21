@@ -33,7 +33,7 @@ const defaultConfig = {
         jsroot: `/modules/${package.version}`,
         modules: [
             '@littleware/little-elements/web',
-            'font-awesome',
+            '@fortawesome/fontawesome-free',
             'i18next',
             'jasmine-core/lib/jasmine-core',
             'lit-html',

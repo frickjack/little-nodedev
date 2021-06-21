@@ -44,10 +44,11 @@ The `npm test` command runs a [jasmine](https://jasmine.github.io/index.html) te
 
 ## Linting
 
-The `lint` script integrates with `tslint`.  There is active development under way in the `typescript` and `eslint` community to integrate via the [typescript-eslint project](https://github.com/typescript-eslint/typescript-eslint), so we'll migrate to that when it's ready.
+The `lint` script integrates with [eslint](https://eslint.org/) and [typescript-eslint](https://github.com/typescript-eslint/typescript-eslint).
 
-* https://medium.com/palantir/tslint-in-2019-1a144c2317a9
-* https://eslint.org/blog/2019/01/future-typescript-eslint
+* https://www.npmjs.com/package/eslint-config-airbnb-typescript
+* https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/README.md
+* https://github.com/typescript-eslint/typescript-eslint
 
 ## CICD
 
