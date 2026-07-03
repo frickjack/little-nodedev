@@ -47,7 +47,7 @@ The `npm test` command runs a [jasmine](https://jasmine.github.io/index.html) te
 The `lint` script integrates with [eslint](https://eslint.org/) and [typescript-eslint](https://github.com/typescript-eslint/typescript-eslint).
 
 * https://www.npmjs.com/package/eslint-config-airbnb-typescript
-* https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/README.md
+* https://github.com/typescript-eslint/typescript-eslint/blob/main/docs/getting-started/linting/README.md
 * https://github.com/typescript-eslint/typescript-eslint
 
 ## CICD
@@ -58,7 +58,7 @@ The [buildspec.yml](../../buildspec.yml) file defines a [codebuild](https://aws.
 
 Before publishing a new version - be sure to update both the [package version](../../package.json) and the [release notes](../reference/releaseNotes.md).
 
-The [codebuild](https://aws.amazon.com/codebuild/) integration (more details [here](https://github.com/frickjack/misc-stuff/blob/master/Notes/explanation/codeBuildCICD.md)) publishes the npm module with a `cicd` tag.  The CICD integration requires that the git tag matches the module version in `package.json`.  Furthermore, we require that all git tags be applied to the `master` branch - which is our `release` branch in our simplified [gitflow](https://datasift.github.io/gitflow/IntroducingGitFlow.html)
+The [codebuild](https://aws.amazon.com/codebuild/) integration (more details [here](https://github.com/frickjack/misc-stuff/blob/main/Notes/explanation/codeBuildCICD.md)) publishes the npm module with a `cicd` tag.  The CICD integration requires that the git tag matches the module version in `package.json`.  Furthermore, we require that all git tags be applied to the `main` branch - which is our `release` branch in our simplified [gitflow](https://datasift.github.io/gitflow/IntroducingGitFlow.html)
 branching strategy.
 ```
 (
