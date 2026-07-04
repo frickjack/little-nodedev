@@ -7,7 +7,7 @@ const marked = require('marked');
 const nunjucksRender = require('gulp-nunjucks-render');
 const sourcemaps = require('gulp-sourcemaps');
 const mkdirp = require('mkdirp');
-const merge = require('merge2');
+const { finished } = require('stream/promises'); // modern nodejs native streams - no merge2
 const replace = require('gulp-replace');
 
 
@@ -56,12 +56,12 @@ module.exports.defaultConfig = defaultConfig;
  */
 function makeFolder(path) {
     return new Promise( function(resolve, reject) {
-            mkdirp( path, function(err) {
+            mkdirp(path, function(err) {
                     if (err) {
-                        console.log( err );
-                        reject( err );
+                        console.log(err);
+                        reject(err);
                     } else {
-                        resolve( path );
+                        resolve(path);
                     }
             });
         });
@@ -129,88 +129,128 @@ function defineTasks(gulp, config) {
         .pipe(gulp.dest('./web/'));
     });
 
-    gulp.task('little-compilehtml', gulp.series('little-compilenunjucks', (done) => { return done(); }));
+    gulp.task('little-compilehtml', gulp.series('little-compilenunjucks'));
 
     const tsConfig = {
         //noImplicitAny: true,
+        strictNullChecks: false,
         target: "ESNEXT",
         //module: commonsjs,
         module: "esnext",
-        //moduleResolution: "Node",
         sourceMap: true,
         declaration: true,
-        baseUrl: "src", // This must be specified if "paths" is.
-        //paths: {
-        //    "*.mjs": ["*", "*.ts"]
-        //},
         rootDirs: [
             ".",
             "node_modules"
-        ]
+        ],
+        types: [ "jasmine" ],
         // declaration: true
+        ...(config.tsConfig || {})
     };
 
     // compile the commonjs/ folder as nodejs modules
     gulp.task('little-compilets-commonjs', () => {
-        const tsBinConfig = { ...tsConfig, module: "commonjs", moduleResolution: "Node" };
+        const tsBinConfig = { ...tsConfig, module: "commonjs" };
+        const globList = [`${basePath}/bin/`, `${basePath}/common/`]
+            .filter(path => fs.existsSync(path))
+            .map(path => `${path}**/*.ts`);
+        if (0 === globList.length) {
+            return Promise.resolve();
+        }
         //console.log(`Running with ${JSON.stringify(tsBinConfig)}`)
-        const tsResult = gulp.src( [`${basePath}/bin/**/*.ts`, `${basePath}/common/**/*.ts`], 
-                { base: basePath })
-            .pipe(ts( tsBinConfig ));
-        return merge(
-            tsResult.js.pipe(gulp.dest("./commonjs")),
-            tsResult.dts.pipe(gulp.dest("./commonjs"))
+        const tsProject = ts.createProject(tsBinConfig);
+        const tsResult = gulp.src(globList,
+                { base: basePath, allowEmpty: true, nodir: true })
+            .pipe(tsProject());
+        return Promise.all(
+            [
+                tsResult.js.pipe(gulp.dest("./commonjs")),
+                tsResult.dts.pipe(gulp.dest("./commonjs"))
+            ].map(pipe => finished(pipe))
         );
     });
 
     // compile all folders except bin/ as es2015 modules
     gulp.task('little-compilets-web', () => {
+        const tsProject = ts.createProject(tsConfig);
         const tsResult = gulp.src( ['src/**/*.ts', `!${basePath}/bin/**/*.ts`], 
-                { base: basePath })
-            .pipe( sourcemaps.init() )
-            .pipe(ts( tsConfig ));
-        return merge(
-            tsResult.pipe(sourcemaps.write('maps/')).pipe(gulp.dest("./web")),
-            tsResult.js.pipe(gulp.dest("./web")),
-            tsResult.dts.pipe(gulp.dest("./web"))
+                { base: basePath, allowEmpty: true, nodir: true })
+            .pipe(sourcemaps.init())
+            .pipe(tsProject());
+        return Promise.all(
+            [
+                tsResult.pipe(sourcemaps.write('maps/')).pipe(gulp.dest("./web")),
+                tsResult.js.pipe(gulp.dest("./web")),
+                tsResult.dts.pipe(gulp.dest("./web"))
+            ].map(pipe => finished(pipe))
         );
     });
 
     /** Copy site/resources/img/ images over */
     gulp.task('little-compileimg', () => {
-        return gulp.src(basePath + '/site/resources/img/**/*').pipe(gulp.dest("web/site/resources/img"));
+        const globList = [ basePath + '/site/resources/img/' ]
+            .filter(path => fs.existsSync(path))
+            .map(path => path + '**/*.*');
+        if (0 === globList.length) {
+            return Promise.resolve();
+        }
+        return gulp.src(
+            globList, 
+            { allowEmpty: true, nodir: true }
+        ).pipe(gulp.dest("web/site/resources/img"));
     });
+
+    const streamSpecList = [
+            { src: 'bin/', dest: 'commonjs/bin' },
+            { src: 'common/', dest: 'commonjs/common' },
+            { src: 'lib/', dest: 'web/lib' },
+            { src: 'common/', dest: 'web/common' },
+            { src: 'site/', dest: 'web/site' }
+        ].map(
+            spec => { spec.src = basePath + '/' + spec.src; return spec; }
+        ).filter(
+            spec => fs.existsSync(spec.src)
+        );
 
     /** Copy json files over over */
     gulp.task('little-json', () => {
-        return merge(
-            gulp.src(basePath + '/bin/**/*.json').pipe(gulp.dest('commonjs/bin')),
-            gulp.src(basePath + '/common/**/*.json').pipe(gulp.dest('commonjs/common')),
-            gulp.src(basePath + '/lib/**/*.json').pipe(gulp.dest('web/lib')),
-            gulp.src(basePath + '/common/**/*.json').pipe(gulp.dest('web/common')),
-            gulp.src(basePath + '/site/**/*.json').pipe(gulp.dest('web/site')),
+        const streamList = streamSpecList.map(
+            spec => gulp.src(spec.src + '**/*.json', { allowEmpty: true, nodir: true }).pipe(gulp.dest(spec.dest))
         );
+        if (0 == streamList.length) {
+            return Promise.resolve();
+        }
+        return Promise.all(streamList.map(pipe => finished(pipe)));
     });
 
     /** Copy markdown files over over */
     gulp.task('little-markdown', () => {
-        return merge(
-            gulp.src(basePath + '/bin/**/*.md').pipe(gulp.dest('commonjs/bin')),
-            gulp.src(basePath + '/common/**/*.md').pipe(gulp.dest('commonjs/common')),
-            gulp.src(basePath + '/lib/**/*.md').pipe(gulp.dest('web/lib')),
-            gulp.src(basePath + '/common/**/*.md').pipe(gulp.dest('web/common')),
-            gulp.src(basePath + '/site/**/*.md').pipe(gulp.dest('web/site')),
+        const streamList = streamSpecList.map(
+            spec => gulp.src(spec.src + '**/*.md', { allowEmpty: true, nodir: true }).pipe(gulp.dest(spec.dest))
         );
+        if (0 == streamList.length) {
+            return Promise.resolve();
+        }
+        return Promise.all(streamList.map(pipe => finished(pipe)));
     });
     
     /** Copy nunjucks templates over */
     gulp.task('little-copynjk', () => {
-        return gulp.src( basePath + '/lib/**/*.njk' ).pipe( gulp.dest( "web/lib/" ) );
+        const globList = [ basePath + '/lib/' ].filter(path => fs.existsSync(path)).map(path => path + '**/*.njk');
+        if (0 === globList.length) {
+            return Promise.resolve();
+        }
+        return gulp.src(globList, { allowEmpty: true, nodir: true }).pipe(gulp.dest("web/lib/"));
     });
 
-    gulp.task('little-compile', gulp.series('little-compilehtml', 'little-compilets-web', 'little-compilets-commonjs', 'little-compileimg', 'little-copynjk', 'little-json', 'little-markdown', (done) => {
-        return done();
-    }));
+    gulp.task('little-compile',
+        gulp.series(
+            'little-compilehtml',
+            'little-compilets-web', 'little-compilets-commonjs',
+            'little-compileimg', 'little-copynjk',
+            'little-json', 'little-markdown'
+        )
+    );
 
     gulp.task('little-watchts', function () {
         // Endless stream mode 
@@ -221,9 +261,7 @@ function defineTasks(gulp, config) {
         return gulp.watch( ['src/**/*.html', 'src/**/*.css', 'src/**/*.njk'], gulp.series('little-compilehtml') ); 
     });
 
-    gulp.task('little-watch', gulp.parallel('little-watchts', 'little-watchhtml', (done) => {
-        return done();
-    }));
+    gulp.task('little-watch', gulp.parallel('little-watchts', 'little-watchhtml'));
 
     gulp.task('little-compileclean', gulp.series('little-clean', 'little-compile'));
 
@@ -231,16 +269,15 @@ function defineTasks(gulp, config) {
      * Prepare /dist folder for deployment
      */
     gulp.task('little-stage', gulp.series('little-clean', 'little-compile', function() {
-        return merge.apply(
-            this,
+        return Promise.all(
             [
-                gulp.src('web/site/**/*.*'
+                gulp.src('web/site/**/*.*', { allowEmpty: true, nodir: true }
                     ).pipe(gulp.dest('dist/')),
-                gulp.src('web/**/*.*').pipe(gulp.dest(`dist${config.staging.jsroot}/${package.name}/web/`)),
+                gulp.src('web/**/*.*', { allowEmpty: true, nodir: true }).pipe(gulp.dest(`dist${config.staging.jsroot}/${package.name}/web/`)),
                 ...
                 config.staging.modules.map(
                     (it) => {
-                        let pipeline = gulp.src(`node_modules/${it}/**/*.*`);
+                        let pipeline = gulp.src(`node_modules/${it}/**/*.*`, { allowEmpty: true, nodir: true });
                         if (it.match(/@littleware\//)) {
                             // hack - replace /modules/ path in styleHelper and basicShell
                             pipeline = pipeline.pipe(replace('"/modules/', `"${config.staging.jsroot}/`));
@@ -248,7 +285,7 @@ function defineTasks(gulp, config) {
                         return pipeline.pipe(gulp.dest(`dist${config.staging.jsroot}/${it}/`));
                     }
                 )
-            ]
+            ].map(pipe => finished(pipe))
         );
     }));
 }

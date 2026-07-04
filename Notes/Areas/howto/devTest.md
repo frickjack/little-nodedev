@@ -26,12 +26,12 @@ src/@module-group/module/
 
 ## Deployment
 
-The build process is setup so that commonjs and web modules are layed out for easy import into other npm packages.  The web content is setup to load code via relative paths when possible, but otherwise assumes javascript modules are deployed under a `/modules/` root.
+The build process is setup so that commonjs and web modules are laid out for easy import into other npm packages.  The web content is setup to load code via relative paths when possible, but otherwise assumes javascript modules are deployed under a `/modules/` root.
 
 
 ## Dev-test
 
-See the [buildspec.yml](../../buildspec.yml) [codebuild](https://aws.amazon.com/codebuild/) configuration.
+See the [buildspec.yml](../../../buildspec.yml) [codebuild](https://aws.amazon.com/codebuild/) configuration.
 
 ```
 npm run build
