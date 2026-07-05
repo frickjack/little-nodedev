@@ -12,6 +12,7 @@
 *tar
 *tgz
 *zip
+package.json.new
 /commonjs/
 /dist/
 /lib/

@@ -56,23 +56,8 @@ The [buildspec.yml](../../buildspec.yml) file defines a [codebuild](https://aws.
 
 ## npm publish
 
-Before publishing a new version - be sure to update both the [package version](../../package.json) and the [release notes](../reference/releaseNotes.md).
+The [codebuild](https://aws.amazon.com/codebuild/) integration (more details [here](https://github.com/frickjack/little-automation/blob/main/Notes/Areas/explanation/codeBuildCICD.md)) publishes the npm module and publishes tags to github when PR's merge to the long-lived `dev` and `main` branches in our [git flow](https://github.com/frickjack/little-automation/blob/main/Notes/Areas/explanation/gitReleaseFlow.md).
 
-The [codebuild](https://aws.amazon.com/codebuild/) integration (more details [here](https://github.com/frickjack/misc-stuff/blob/main/Notes/explanation/codeBuildCICD.md)) publishes the npm module with a `cicd` tag.  The CICD integration requires that the git tag matches the module version in `package.json`.  Furthermore, we require that all git tags be applied to the `main` branch - which is our `release` branch in our simplified [gitflow](https://datasift.github.io/gitflow/IntroducingGitFlow.html)
-branching strategy.
-```
-(
-  version="$(jq -r .version < package.json)"
-  git tag -a "$version" -m "release details in Notes/reference/releaseNotes.md#$version"
-  git push origin $version
-)
-```
-
-After a module version has been published with the `cicd` tag, we must manually apply the `latest` tag to make the new version the new default for consumers:
-```
-(
-  version="$(jq -r .version < package.json)"
-  packname="$(jq -r .name < package.json)"
-  npm dist-tag add "${packname}@$version" latest
-)
-```
+Useful npm commands:
+* npm publish
+* npm dist-tag
