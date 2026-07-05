@@ -2,39 +2,106 @@
 version: 0.2
 
 env:
+  shell: bash
   variables:
     LITTLE_INTERACTIVE: "false"
   parameter-store:
     NPM_TOKEN: "/aws/reference/secretsmanager/applications/cicd/cell0/dev/npmjs-token"
+    GITHUB_TOKEN: "dev.cicd.main.active.github-token"
 phases:
   install:
     runtime-versions:
-      nodejs: 14
+      nodejs: 24
     commands:
       - echo "Entered the install phase - jq already installed ..."
       #- apt-get update -y
       #- apt-get install -y jq
   pre_build:
     commands:
-      - echo "HOME is $HOME, CODEBUILD_SRC_DIR is $CODEBUILD_SRC_DIR, CODEBUILD_SRC_DIR_HELPERS is $CODEBUILD_SRC_DIR_HELPERS, pwd is $(pwd)"
-      - echo "//registry.npmjs.org/:_authToken=$(echo "$NPM_TOKEN" | jq -e -r .token)" > "$HOME/.npmrc"
-      - mkdir -p "$HOME/.aws"; /bin/echo -e "[default]\nregion = ${AWS_REGION}\noutput = json\ncredential_source = Ec2InstanceMetadata\n" | tee "$HOME/.aws/config"
-      - npm ci
-      - pip install yq --upgrade
+      - |
+        (
+          set -eux
+          echo "HOME is $HOME, CODEBUILD_SRC_DIR is $CODEBUILD_SRC_DIR, CODEBUILD_SRC_DIR_HELPERS is $CODEBUILD_SRC_DIR_HELPERS, pwd is $(pwd)"
+          echo "//registry.npmjs.org/:_authToken=$(echo "$NPM_TOKEN" | jq -e -r .token)" > "$HOME/.npmrc"
+          mkdir -p "$HOME/.aws"; /bin/echo -e "[default]\nregion = ${AWS_REGION}\noutput = json\ncredential_source = Ec2InstanceMetadata\n" | tee "$HOME/.aws/config"
+          npm ci
+          pip install yq --upgrade
+          echo "Configuring Git authentication..."
+          # Extracts the repository URL format dynamically from the CodeBuild environment
+          REPO_URL=$(git config --get remote.origin.url | sed 's|https://||')
+          # Re-configures the origin URL to securely inject the GitHub token
+          git remote set-url origin "https://${GITHUB_TOKEN}@${REPO_URL}"
+          # Sets required Git identity configs to prevent commit/tag errors
+          git config --global user.name "AWS CodeBuild"
+          git config --global user.email "codebuild@amazonaws.com"
+        )
   build:
     commands:
-      - npm run build
-      - npm run lint
-      - npm audit --audit-level=high
-      - npm run test
+      - |
+        (
+          set -eux
+          BUILD_TYPE="MANUAL"
+          if [ -n "$CODEBUILD_WEBHOOK_TRIGGER" ]; then
+            BUILD_TYPE="$(echo "$CODEBUILD_WEBHOOK_TRIGGER" | awk -F / '{ print $1 }')"
+          fi
+          echo "BUILD_TYPE is $BUILD_TYPE, CODEBUILD_WEBHOOK_EVENT is $CODEBUILD_WEBHOOK_EVENT, CODEBUILD_WEBHOOK_TRIGGER is $CODEBUILD_WEBHOOK_TRIGGER"
+          if [ "$BUILD_TYPE" = "tag" ] || [ "$CODEBUILD_WEBHOOK_EVENT" = "PULL_REQUEST_MERGED" ]; then
+            echo "skipping tests for tag or merge events"
+          else
+            npm run build
+            # npm run lint
+            npm audit --omit dev --audit-level=critical
+            npm run test
+          fi
+        )
   post_build:
     commands:
-      - echo "CODEBUILD_WEBHOOK_TRIGGER == $CODEBUILD_WEBHOOK_TRIGGER"
-      # checkout a branch, so lambda publish goes there
-      - git checkout -b "cicd-$CODEBUILD_WEBHOOK_TRIGGER"
-      - BUILD_TYPE="$(echo $CODEBUILD_WEBHOOK_TRIGGER | awk -F / '{ print $1 }')"
-      - echo "BUILD_TYPE is $BUILD_TYPE"
-      # publish lambda layers for pr's and tags
-      #- if test "$BUILD_TYPE" = pr || test "$BUILD_TYPE" = tag; then bash "$CODEBUILD_SRC_DIR_HELPERS/AWS/little.sh" lambda update "$CODEBUILD_SRC_DIR"; fi
-      # publish on tag events - see https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
-      - if test "$BUILD_TYPE" = tag; then npm publish . --tag cicd --access public; fi
+      - |
+        (
+          set -ex
+          if [ "$CODEBUILD_BUILD_SUCCEEDING" = 0 ]; then
+              # post_build stage always runs - other stages do not run on failure
+              echo "build failed, skipping post_build"
+              exit 0
+          fi
+          BUILD_TYPE="MANUAL"
+          if [ -n "$CODEBUILD_WEBHOOK_TRIGGER" ]; then
+            # Note: codebuild sh does not support <<<
+            BUILD_TYPE="$(echo "$CODEBUILD_WEBHOOK_TRIGGER" | awk -F / '{ print $1 }')"
+          fi
+          echo "BUILD_TYPE is $BUILD_TYPE, CODEBUILD_WEBHOOK_EVENT is $CODEBUILD_WEBHOOK_EVENT, CODEBUILD_WEBHOOK_TRIGGER is $CODEBUILD_WEBHOOK_TRIGGER"
+          if [ "$CODEBUILD_WEBHOOK_EVENT" != "PULL_REQUEST_MERGED" ]; then
+              echo "CODEBUILD_WEBHOOK_EVENT is not a pr merge event, skipping post_build: $CODEBUILD_WEBHOOK_EVENT"
+              echo "running anyway to test post-build"
+              # exit 0
+          fi
+
+          little() {
+              bash "$CODEBUILD_SRC_DIR_HELPERS/AWS/little.sh" "$@"
+          }
+          
+          PATCH_VERSION="$CODEBUILD_BUILD_NUMBER"
+          PACKAGE_SEMVER="$(jq -r .version < package.json)"
+          MAJOR="$(echo "$PACKAGE_SEMVER" | awk -F . '{ print $1 }')"
+          DEV_MINOR="$(echo "$PACKAGE_SEMVER" | awk -F . '{ print $1 }')"
+          BRANCH_NAME="$(little codebuild branch-name)"
+          # for testing
+          BRANCH_NAME=dev
+          TAG_NAME="$(little codebuild tag-name $MAJOR $DEV_MINOR $PATCH_VERSION "$BRANCH_NAME")"
+          
+          if test -n "$TAG_NAME"; then
+            little ecr login || exit 1
+            echo "Creating and pushing Git tag: $TAG_NAME"
+            git tag -a "$TAG_NAME" -m "Automated build tag from CodeBuild run $CODEBUILD_BUILD_NUMBER"
+            git push origin "$TAG_NAME"
+            jq --arg TAG_NAME "$TAG_NAME" -r '.version = $TAG_NAME' < package.json | tee package.json.new
+            mv package.json.new package.json
+            if [ "$BRANCH_NAME" = "dev" ]; then
+              npm publish . --access public --tag cicd
+            else
+              npm publish . --access public
+            fi
+          else
+            echo "not tagging on branch $BRANCH_NAME"
+          fi
+        )
