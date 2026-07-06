@@ -2,7 +2,7 @@
   "name": "@littleware/little-nodedev",
   "version": "1.1.0",
   "type": "commonjs",
-  "description": "build and deployment tools for @littlewaer/ projects",
+  "description": "build and deployment tools for @littleware/ projects",
   "main": "",
   "files": [
     "README.md",
