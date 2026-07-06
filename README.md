@@ -2,20 +2,40 @@
 
 Dev tools to help build, test, and deploy the @littleware typescript packages for nodejs and web.
 
+This [bLog](https://fortelabs.com/blog/para/) explains the PARA method for
+organizing information: project, area, resource, and archive.
+Our `Archives/` folder has `Completed/` and `Abandoned/` sub-folders, and the
+`Projects/` folder has `Planning/` and `Active/` sub-folders.
+
+This [bLog](https://www.divio.com/blog/documentation/) explains the 4 types of documentation: tutorials, how-to guides, explanation, and reference.  The `Notes/Areas` folder has
+sub-folders for each type of documentation.
+
 ## TOC
 
-See [this bLog](https://www.divio.com/blog/documentation/) for an introduction to the different types of documentation (explanation, how-to, tutorial, reference).
+### [projects](./Notes/Projects)
 
-### Explanation
+Projects will eventually move to the archive, so don't bookmark them.
 
-* the [gulp helper](./Notes/explanation/gulpHelper.md) includes a variety of rules to help build and deploy server and client side typescript apps.
 
-### How-to
+### [areas](./Notes/Areas)
 
-* [dev-test](./Notes/howto/devTest.md)
+#### [tutorials](./Notes/Areas/tutorial)
 
-### Tutorials
+#### [explanation](./Notes/Areas/explanation)
 
-### Reference
+* the [gulp helper](./Notes/Areas/explanation/gulpHelper.md) includes a variety of rules to help build and deploy server and client side typescript apps.
 
-* [release notes](./Notes/reference/releaseNotes.md)
+#### [how-tos](./Notes/Areas/howto)
+
+* [dev-test](./Notes/Areas/howto/devTest.md)
+
+#### [reference](./Notes/Areas/reference)
+
+* [release notes](./Notes/Areas/reference/releaseNotes.md)
+
+### [archives](./Notes/Archives)
+
+### [resources](./Notes/Resources)
+
+* [littleware gitflow flavor](https://github.com/frickjack/little-automation/blob/main/Notes/Areas/explanation/gitReleaseFlow.md)
+

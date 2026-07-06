@@ -12,3 +12,6 @@ hugo-site
 Process
 # don't lint our documentation
 Notes
+# don't lint jasmin specs
+src/**/*Spec.ts
+src/**/testMain.ts

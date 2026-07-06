@@ -41,9 +41,7 @@ const gulpHelper = require('./gulpHelper');
 
 gulpHelper.defineTasks(gulp);
 
-gulp.task('default', gulp.series('little-compile', 
-    (done) => { done(); }
-);
+gulp.task('default', gulp.series('little-compile'));
 
 ```
 
