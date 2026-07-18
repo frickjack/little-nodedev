@@ -40,7 +40,7 @@ npm run lint
 npm audit
 ```
 
-The `npm test` command runs a [jasmine](https://jasmine.github.io/index.html) test suites for web modules (using [karmajs](http://karma-runner.github.io/4.0/index.html)) and commonjs modules (with jasmine's nodejs runner).
+The `npm test` command runs [jasmine](https://jasmine.github.io/index.html) test suites.
 
 ## Linting
 

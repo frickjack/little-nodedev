@@ -3,7 +3,7 @@ const clean = require('gulp-rimraf');
 const fs = require('fs');
 const ts = require('gulp-typescript');
 const markdown = require('nunjucks-markdown');
-const marked = require('marked');
+const { marked } = require('marked');
 const nunjucksRender = require('gulp-nunjucks-render');
 const sourcemaps = require('gulp-sourcemaps');
 const mkdirp = require('mkdirp');
@@ -132,7 +132,7 @@ function defineTasks(gulp, config) {
     gulp.task('little-compilehtml', gulp.series('little-compilenunjucks'));
 
     const tsConfig = {
-        //noImplicitAny: true,
+        noImplicitAny: false,
         strictNullChecks: false,
         target: "ESNEXT",
         //module: commonsjs,
