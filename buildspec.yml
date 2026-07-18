@@ -14,6 +14,7 @@ phases:
       nodejs: 24
     commands:
       - echo "Entered the install phase - jq already installed ..."
+      - pip install yq --upgrade
       #- apt-get update -y
       #- apt-get install -y jq
   pre_build:
@@ -25,7 +26,6 @@ phases:
           echo "//registry.npmjs.org/:_authToken=$(echo "$NPM_TOKEN" | jq -e -r .token)" > "$HOME/.npmrc"
           mkdir -p "$HOME/.aws"; /bin/echo -e "[default]\nregion = ${AWS_REGION}\noutput = json\ncredential_source = Ec2InstanceMetadata\n" | tee "$HOME/.aws/config"
           npm ci
-          pip install yq --upgrade
           echo "Configuring Git authentication..."
           # Extracts the repository URL format dynamically from the CodeBuild environment
           REPO_URL=$(git config --get remote.origin.url | sed 's|https://||')
@@ -49,7 +49,7 @@ phases:
             echo "skipping tests for tag or merge events"
           else
             npm run build
-            # npm run lint
+            # npm run lint - eslint is busted
             npm audit --omit dev --audit-level=critical
             npm run test
           fi
@@ -82,12 +82,11 @@ phases:
           PATCH_VERSION="$CODEBUILD_BUILD_NUMBER"
           PACKAGE_SEMVER="$(jq -r .version < package.json)"
           MAJOR="$(echo "$PACKAGE_SEMVER" | awk -F . '{ print $1 }')"
-          DEV_MINOR="$(echo "$PACKAGE_SEMVER" | awk -F . '{ print $1 }')"
+          DEV_MINOR="$(echo "$PACKAGE_SEMVER" | awk -F . '{ print $2 }')"
           BRANCH_NAME="$(little codebuild branch-name)"
           TAG_NAME="$(little codebuild tag-name $MAJOR $DEV_MINOR $PATCH_VERSION "$BRANCH_NAME")"
           
           if test -n "$TAG_NAME"; then
-            little ecr login || exit 1
             echo "Creating and pushing Git tag: $TAG_NAME"
             git tag -a "$TAG_NAME" -m "Automated build tag from CodeBuild run $CODEBUILD_BUILD_NUMBER"
             git push origin "$TAG_NAME"
