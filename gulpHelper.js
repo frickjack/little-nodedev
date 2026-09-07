@@ -102,7 +102,7 @@ function defineTasks(gulp, config) {
         console.log('Clean all files in web/, commonjs/, and site/ folders');
         return gulp.src(
             ['commonjs', 'dist', 'web', 'site', 'dist'],
-            { read: false, allowEmpty: true }
+            { read: false, allowEmpty: true, encoding: false }
          ).pipe(clean());
     });
 
@@ -196,7 +196,7 @@ function defineTasks(gulp, config) {
         }
         return gulp.src(
             globList, 
-            { allowEmpty: true, nodir: true }
+            { allowEmpty: true, nodir: true, encoding: false }
         ).pipe(gulp.dest("web/site/resources/img"));
     });
 
@@ -271,18 +271,18 @@ function defineTasks(gulp, config) {
     gulp.task('little-stage', gulp.series('little-clean', 'little-compile', function() {
         return Promise.all(
             [
-                gulp.src('web/site/**/*.*', { allowEmpty: true, nodir: true }
-                    ).pipe(gulp.dest('dist/')),
-                gulp.src('web/**/*.*', { allowEmpty: true, nodir: true }).pipe(gulp.dest(`dist${config.staging.jsroot}/${package.name}/web/`)),
+                gulp.src('web/site/**/*.*', { allowEmpty: true, nodir: true, encoding: false }
+                    ).pipe(gulp.dest('dist/', { encoding: false })),
+                gulp.src('web/**/*.*', { allowEmpty: true, nodir: true, encoding: false }).pipe(gulp.dest(`dist${config.staging.jsroot}/${package.name}/web/`, { encoding: false })),
                 ...
                 config.staging.modules.map(
                     (it) => {
-                        let pipeline = gulp.src(`node_modules/${it}/**/*.*`, { allowEmpty: true, nodir: true });
+                        let pipeline = gulp.src(`node_modules/${it}/**/*.*`, { allowEmpty: true, nodir: true, encoding: false });
                         if (it.match(/@littleware\//)) {
                             // hack - replace /modules/ path in styleHelper and basicShell
                             pipeline = pipeline.pipe(replace('"/modules/', `"${config.staging.jsroot}/`));
                         }
-                        return pipeline.pipe(gulp.dest(`dist${config.staging.jsroot}/${it}/`));
+                        return pipeline.pipe(gulp.dest(`dist${config.staging.jsroot}/${it}/`, { encoding: false }));
                     }
                 )
             ].map(pipe => finished(pipe))
